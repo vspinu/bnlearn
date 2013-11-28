@@ -645,7 +645,7 @@ is.fitted.type = function(fitted, type) {
 }#IS.FITTED.TYPE
 
 # is the fitted bayesian network a discrete one?
-is.fitted.discrete = function(fitted) is.fitted.type(fitted, "bn.fit.dnode")
+is.fitted.discrete = function(fitted) is.fitted.type(fitted, "bn.fit.dnode") || is.fitted.type(fitted, "bn.fit.onode")
 # is the fitted bayesian network an ordinal one?
 is.fitted.ordinal = function(fitted) is.fitted.type(fitted, "bn.fit.onode")
 # is the fitted bayesian network a continuous one?
@@ -2272,7 +2272,7 @@ check.mutilated.evidence = function(evidence, graph) {
   if (identical(evidence, TRUE))
     return(TRUE)
   # check whether evidence is a named list.
-  if(!is(evidence, "list"))
+  if(!(is.list(evidence) || is.data.frame(evidence)))
     stop("evidence must be a list with elements named after the nodes in the graph.")
   # check the node labels in evidence.
   check.nodes(names(evidence), graph = graph)
