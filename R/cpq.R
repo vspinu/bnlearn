@@ -1,4 +1,5 @@
 
+## evaluate event as given by unevaluate expression or a list in "data"
 eval.event <- function(event, data){
     frame = parent.frame()
     if (identical(event, TRUE))
@@ -17,7 +18,7 @@ eval.event <- function(event, data){
 check.logical_event <- function(le, n, type){
     if (!is.logical(le))
         stop(type, " must evaluate to a logical vector.")
-    if (length(le) != n)
+    if (!(length(le) == 1L || length(le) == n))
         stop("logical vector for ", type,
              " is of length ", length(le),
              " instead of ", n, ".")
@@ -341,13 +342,7 @@ logic.distribution = function(fitted, nodes, evidence, n, batch, debug = FALSE) 
     if (debug)
       cat("* generated", m, "samples from the bayesian network.\n")
 
-    if (is.language(evidence))
-      r = eval(evidence, generated.data, parent.frame())
-    else { # should be list or data.frame
-      r = TRUE
-      for(nm in names(evidence))
-        r = r & generated.data[[nm]] %in% evidence[[nm]]
-    }
+    r = eval.event(evidence, generated.data)
 
     # double check that this is a logical vector.
     if (!is.logical(r))

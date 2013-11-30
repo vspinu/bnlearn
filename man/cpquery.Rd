@@ -44,9 +44,7 @@ mutilated(x, evidence)
   \code{mutilated} constructs the mutilated network used for sampling
     in \emph{likelihood weighting}.
 
-}
-\section{Logic Sampling}{
-
+    
   When \code{event} or \code{evidence} are of class lists, names should
   correspond to nodes in the \code{fitted} object and each component
   will be treated as \code{or} expression. For example an event like
@@ -65,6 +63,9 @@ mutilated(x, evidence)
   \code{TRUE} an unconditional probability query is performed with
   respect to that argument.
 
+  }
+  
+\section{Logic Sampling}{
 
   Three tuning parameters are available:
 
@@ -94,13 +95,6 @@ mutilated(x, evidence)
 
 }
 \section{Likelihood Weighting}{
-
-  The \code{event} argument must be an expression describing the event of
-  interest, as in logic sampling. The \code{evidence} argument must be a
-  named list; each element corresponds to one node in the network and must
-  contain the value that node will be set to when sampling.
-  If either \code{event} or \code{evidence} is set to \code{TRUE} an
-  unconditional probability query is performed with respect to that argument.
 
   Tuning parameters are the same as for logic sampling: \code{n}, \code{batch}
   and \code{query.nodes}.
@@ -139,7 +133,7 @@ fitted <- bn.fit(bn, learning.test)
 cpquery(fitted, expression((B == "b")), expression((A == "a")))
 ## for a single observation, predict the value of a single
 ## variable conditional on the others:
-ev <- learning.test[obs, -4]
+ev <- learning.test[2, -4]
 cpquery(fitted, list(D = "b"), ev)
 cpquery(fitted, list(D = "c"), ev)
 cpquery(fitted, list(D = c("b", "c")), ev)
