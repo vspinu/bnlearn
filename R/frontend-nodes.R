@@ -204,6 +204,8 @@ setGeneric("nodes<-", function(object, value) standardGeneric("nodes<-"))
 setMethod("nodes<-", c("bn", "ANY"),
           function(object, value){
               value <- as.character(value)
+              if(any(duplicated(value)))
+                  stop("duplicated names detected: ", value[which(duplicated(value))[[1]]])
               nodes <- names(object$nodes)
               if(length(nodes) != length(value))
                   stop(sprintf("length of new node names (%s) should be equal to the number of nodes in the graph (%s)",
