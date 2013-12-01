@@ -36,7 +36,6 @@ export(
   "children<-",
   "root.nodes",
   "leaf.nodes",
-  "nodes<-",
   "in.degree",
   "out.degree",
   "amat",
@@ -174,7 +173,6 @@ S3method(predict, "bn.naive")
 S3method(predict, "bn.tan")
 S3method("$<-", "bn.fit")
 S3method("[[<-", "bn.fit")
-S3method("nodes<-", "bn")
 
 exportClasses("bn", "bn.fit")
-exportMethods(nodes, degree)
+exportMethods(nodes, "nodes<-", degree)

@@ -198,30 +198,30 @@ out.degree = function(x, node) {
 }#OUT.DEGREE
 
 
-`nodes<-` <- function(object, value){
-  UseMethod("nodes<-", object)
-}
+setGeneric("nodes<-", function(object, value) standardGeneric("nodes<-"))
 
-`nodes<-.bn` <- function(object, value){
-  value <- as.character(value)
-  nodes <- names(object$nodes)
-  if(length(nodes) != length(value))
-    stop(sprintf("length of new node names (%s) should be equal to the number of nodes in the graph (%s)",
-                 length(value), length(nodes)))
-  .subst <- function(nms){
-    m <- match(nms, nodes)
-    value[m]
-  }
 
-  if(!is.null(object$whitelist))
-    object$whitelist <- .subst(object$whitelist)
+setMethod("nodes<-", c("bn", "ANY"),
+          function(object, value){
+              value <- as.character(value)
+              nodes <- names(object$nodes)
+              if(length(nodes) != length(value))
+                  stop(sprintf("length of new node names (%s) should be equal to the number of nodes in the graph (%s)",
+                               length(value), length(nodes)))
+              .subst <- function(nms){
+                  m <- match(nms, nodes)
+                  value[m]
+              }
 
-  if(!is.null(object$blacklist))
-    object$blacklist <- .subst(object$blacklist)
+              if(!is.null(object$learning$whitelist))
+                  object$learning$whitelist <- .subst(object$lea$whitelist)
 
-  object$nodes <- rapply(object$nodes, .subst, how = "replace")
-  names(object$nodes) <- .subst(names(object$nodes))
+              if(!is.null(object$learning$blacklist))
+                  object$learning$blacklist <- .subst(object$learning$blacklist)
 
-  object$arcs[] <- .subst(object$arcs)
-  object
-}
+              object$nodes <- rapply(object$nodes, .subst, how = "replace")
+              names(object$nodes) <- .subst(names(object$nodes))
+
+              object$arcs[] <- .subst(object$arcs)
+              object
+          })
