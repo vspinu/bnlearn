@@ -1,4 +1,29 @@
 
+## evaluate event as given by unevaluate expression or a list in "data"
+eval.event <- function(event, data){
+    frame = parent.frame()
+    if (identical(event, TRUE))
+        TRUE
+    else if (is.language(event))
+        eval(event, data, frame)
+    else { # should be list or data.frame
+        r = TRUE
+        nms <- names(event)
+        for(i in seq_along(event)) ## don't use names, can be repeatead!!
+            r = r & (data[[nms[[i]]]] %in% event[[i]])
+        r
+    }
+}
+
+check.logical_event <- function(le, n, type){
+    if (!is.logical(le))
+        stop(type, " must evaluate to a logical vector.")
+    if (!(length(le) == 1L || length(le) == n))
+        stop("logical vector for ", type,
+             " is of length ", length(le),
+             " instead of ", n, ".")
+}
+
 # backend for conditional probability queries.
 conditional.probability.query = function(fitted, event, evidence, method,
     extra, probability = TRUE, cluster = NULL, debug = FALSE) {
@@ -228,17 +253,9 @@ logic.sampling = function(fitted, event, evidence, n, batch, debug = FALSE) {
       cat("* generated", m, "samples from the bayesian network.\n")
 
     # evaluate the expression defining the evidence.
-    if (identical(evidence, TRUE))
-      r = rep(TRUE, m)
-    else
-      r = eval(evidence, generated.data, parent.frame())
-    # double check that this is a logical vector.
-    if (!is.logical(r))
-      stop("evidence must evaluate to a logical vector.")
-    # double check that it is of the right length.
-    if (length(r) != m)
-      stop("logical vector for evidence is of length ", length(r),
-        " instead of ", m, ".")
+    r = eval.event(evidence, generated.data)
+    check.logical_event(r, m, "evidence")
+
     # filter out the samples not matching the evidence we assume.
     filtered = r & !is.na(r)
 
@@ -258,17 +275,9 @@ logic.sampling = function(fitted, event, evidence, n, batch, debug = FALSE) {
     }#THEN
 
     # evaluate the expression defining the event.
-    if (identical(event, TRUE))
-      r = rep(TRUE, m)
-    else
-      r = eval(event, generated.data, parent.frame())
-    # double check that this is a logical vector.
-    if (!is.logical(r))
-      stop("event must evaluate to a logical vector.")
-    # double check that it is of the right length.
-    if (length(r) != m)
-      stop("logical vector for event is of length ", length(r),
-        " instead of ", m, ".")
+    r = eval.event(event, generated.data)
+    check.logical_event(r, m, "event")
+
     # filter out the samples not matching the event we are looking for.
     matching = filtered & r & !is.na(r)
 
@@ -333,8 +342,8 @@ logic.distribution = function(fitted, nodes, evidence, n, batch, debug = FALSE) 
     if (debug)
       cat("* generated", m, "samples from the bayesian network.\n")
 
-    # evaluate the expression defining the evidence.
-    r = eval(evidence, generated.data, parent.frame())
+    r = eval.event(evidence, generated.data)
+
     # double check that this is a logical vector.
     if (!is.logical(r))
       stop("evidence must evaluate to a logical vector.")
@@ -415,17 +424,8 @@ weighting.sampling = function(fitted, event, evidence, n, batch, debug = FALSE) 
       cat("* generated", m, "samples from the bayesian network.\n")
 
     # evaluate the expression defining the event.
-    if (identical(event, TRUE))
-      r = rep(TRUE, m)
-    else
-      r = eval(event, generated.data, parent.frame())
-    # double check that this is a logical vector.
-    if (!is.logical(r))
-      stop("event must evaluate to a logical vector.")
-    # double check that it is of the right length.
-    if (length(r) != m)
-      stop("logical vector for event is of length ", length(r),
-        " instead of ", m, ".")
+    r = eval.event(event, generated.data)
+    check.logical_event(r, m, "event")
     # filter out the samples not matching the event we are looking for.
     matching = r & !is.na(r)
 

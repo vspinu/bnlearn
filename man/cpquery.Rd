@@ -19,7 +19,8 @@ mutilated(x, evidence)
 \arguments{
   \item{fitted}{an object of class \code{bn.fit}.}
   \item{x}{an object of class \code{bn} or \code{bn.fit}.}
-  \item{event, evidence}{see below.}
+  \item{event, evidence}{a list, a data.frame, an unevaluated expression
+  or TRUE. See Details and Examples below.}
   \item{nodes}{a vector of character strings, the labels of the nodes whose
     conditional distribution we are interested in.}
   \item{cluster}{an optional cluster object from package \pkg{snow}.
@@ -43,16 +44,28 @@ mutilated(x, evidence)
   \code{mutilated} constructs the mutilated network used for sampling
     in \emph{likelihood weighting}.
 
-}
-\section{Logic Sampling}{
+    
+  When \code{event} or \code{evidence} are of class lists, names should
+  correspond to nodes in the \code{fitted} object and each component
+  will be treated as \code{or} expression. For example an event like
+  \code{list(A=c("a1", "a2"), B="c")} is equivalent to
+  \code{(A=="a1"||A=="a2") & (B=="c")}. If either \code{event} or
+  \code{evidence} is a data.frames, it will be treated as a list.
 
-  The \code{event} and \code{evidence} arguments must be two expressions
-  describing the event of interest and the conditioning evidence in a
-  format such that, if we denote with \code{data} the data set the network
-  was learned from, \code{data[evidence, ]} and \code{data[event, ]}
-  return the correct observations.
-  If either \code{event} or \code{evidence} is set to \code{TRUE} an
-  unconditional probability query is performed with respect to that argument.
+  If \code{event} and \code{evidence} arguments are unevaluated
+  expressions then they should describe the event of interest and the
+  conditioning evidence such that, if we denote with \code{data} the
+  data set the network was learned from, \code{data[eval(evidence,
+  data), ]} and \code{data[eval(event, data), ]} return the correct
+  observations.
+
+  If either \code{event} or \code{evidence} is set to
+  \code{TRUE} an unconditional probability query is performed with
+  respect to that argument.
+
+  }
+  
+\section{Logic Sampling}{
 
   Three tuning parameters are available:
 
@@ -83,13 +96,6 @@ mutilated(x, evidence)
 }
 \section{Likelihood Weighting}{
 
-  The \code{event} argument must be an expression describing the event of
-  interest, as in logic sampling. The \code{evidence} argument must be a
-  named list; each element corresponds to one node in the network and must
-  contain the value that node will be set to when sampling.
-  If either \code{event} or \code{evidence} is set to \code{TRUE} an
-  unconditional probability query is performed with respect to that argument.
-
   Tuning parameters are the same as for logic sampling: \code{n}, \code{batch}
   and \code{query.nodes}.
 
@@ -116,36 +122,39 @@ mutilated(x, evidence)
 
 }
 \examples{
+
 ## discrete Bayesian network (it's the same with ordinal nodes).
 data(learning.test)
-fitted = bn.fit(hc(learning.test), learning.test)
-# the result should be around 0.025.
-cpquery(fitted, (B == "b"), (A == "a"))
-# for a single observation, predict the value of a single
-# variable conditional on the others.
-var = names(learning.test)
-obs = 2
-str = paste("(", names(learning.test)[-3], "=='",
-        sapply(learning.test[obs,-3], as.character), "')",
-        sep = "", collapse = " & ")
-str
-str2 = paste("(", names(learning.test)[3], "=='",
-         as.character(learning.test[obs, 3]), "')", sep = "")
-str2
-cpquery(fitted, eval(parse(text = str2)), eval(parse(text = str)))
-# do the same with likelihood weighting
-cpquery(fitted, event = eval(parse(text = str2)),
-  evidence = as.list(learning.test[2, -3]), method = "lw")
-# conditional distribution of A given C == "c".
-table(cpdist(fitted, "A", (C == "c")))
+bn <- hc(learning.test)
+plot(bn)
+fitted <- bn.fit(bn, learning.test)
+
+## the result should be around 0.025.
+cpquery(fitted, expression((B == "b")), expression((A == "a")))
+## for a single observation, predict the value of a single
+## variable conditional on the others:
+ev <- learning.test[2, -4]
+cpquery(fitted, list(D = "b"), ev)
+cpquery(fitted, list(D = "c"), ev)
+cpquery(fitted, list(D = c("b", "c")), ev)
+cpquery(fitted, list(D = "b", D = "c"), ev) # 0
+
+## do the same with logical sampling:
+cpquery(fitted, event = quote(C=='c'),  evidence = learning.test[2, -3], method = "ls")
+## do the same with likelihood weighting:
+cpquery(fitted, event = quote(C=='c'),  evidence = learning.test[2, -3], method = "lw")
+
+## conditional distribution of A given C == "c".
+prop.table(table(cpdist(fitted, "A", list(C = "c"), method = "lw")))
 
 ## Gaussian Bayesian network.
 data(gaussian.test)
 fitted = bn.fit(hc(gaussian.test), gaussian.test)
-# the result should be around 0.04.
+## the result should be around 0.04.
 cpquery(fitted,
-  event = ((A >= 0) & (A <= 1)) & ((B >= 0) & (B <= 3)),
-  evidence = (C + D < 10))
+        event = expression(((A >= 0) & (A <= 1)) & ((B >= 0) & (B <= 3))),
+        evidence = expression((C + D < 10)))
+
 }
 \author{ Marco Scutari }
 \keyword{multivariate}

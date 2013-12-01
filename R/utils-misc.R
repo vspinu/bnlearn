@@ -147,7 +147,7 @@ flatten.2d.table = function(x) {
 # explode an unevaluated expression into a character vector.
 explode = function(x) {
 
-  if (is.list(x))
+  if (is.list(x) || is.data.frame(x))
     return(names(x))
   else if (identical(x, TRUE))
     return(character(0))

@@ -104,21 +104,23 @@ cpquery = function(fitted, event, evidence, cluster = NULL, method = "ls", ..., 
 
   # deparse the expression for the event before passing it to
   # the backend and beyond.
-  event = substitute(event)
+  ## event = substitute(event)
 
   # recheck event and evidence expression after deparsing.
-  if (!(is.language(event) || identical(event, TRUE)))
-    stop("event must be an unevaluated expression or TRUE.")
+  if (!(is.language(event) || identical(event, TRUE) ||
+        is.list(event) || is.data.frame(event)))
+    stop("event must be a list, a data.frame, an unevaluated expression or TRUE.")
+
   if (method == "ls") {
 
     if (missing(evidence))
       stop("the expression describing the evidence is missing.")
 
     # deparse evidence expression before passing it to the backend and beyond.
-    evidence = substitute(evidence)
+    ## evidence = substitute(evidence)
     # recheck event and evidence expression after deparsing.
-    if (!(is.language(evidence) || identical(evidence, TRUE)))
-      stop("evidence must be an unevaluated expression or TRUE.")
+    if (!(is.language(event) || identical(event, TRUE) || is.list(event) || is.data.frame(event)))
+        stop("event must be a list, a data.frame, an unevaluated expression or TRUE.")
 
   }#THEN
   else if (method == "lw") {
@@ -174,10 +176,12 @@ cpdist = function(fitted, nodes, evidence, cluster = NULL, method = "ls", ..., d
       stop("the expression describing the evidence is missing.")
 
     # deparse evidence expression before passing it to the backend and beyond.
-    evidence = substitute(evidence)
+    ## evidence = substitute(evidence)
     # recheck event and evidence expression after deparsing.
-    if (!(is.language(evidence) || identical(evidence, TRUE)))
-      stop("evidence must be an unevaluated expression or TRUE.")
+    if (!(is.language(evidence) || identical(evidence, TRUE) ||
+          is.list(evidence) || is.data.frame()))
+      stop("evidence must be a list, data.frame, an unevaluated expression or TRUE.")
+
 
   }#THEN
   else if (method == "lw") {
