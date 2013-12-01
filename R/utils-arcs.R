@@ -141,16 +141,16 @@ set.edge.backend = function(from, to, arcs, debug = FALSE) {
 # drop an arc.
 drop.arc.backend = function(arcs, dropped, debug = FALSE) {
 
-  # the arc is there, undirected.
-  if (is.listed(arcs, dropped, both = TRUE)) {
+  ## # the arc is there, undirected.
+  ##   if (is.listed(arcs, dropped, both = TRUE)) {
 
-    if (debug)
-      cat("  > the arc", dropped[1], "-", dropped[2], "is undirected, nothing to do.\n")
+  ##     if (debug)
+  ##     cat("  > the arc", dropped[1], "-", dropped[2], "is undirected, nothing to do.\n")
 
-    arcs
+  ##   arcs
 
-  }#THEN
-  else {
+  ## }#THEN
+  ## else {
 
     if (debug)
       cat("  > dropping any arc between", dropped[1], "and", dropped[2], ".\n")
@@ -158,7 +158,7 @@ drop.arc.backend = function(arcs, dropped, debug = FALSE) {
     arcs[!(is.row.equal(arcs, dropped) |
            is.row.equal(arcs, dropped[c(2, 1)])), , drop = FALSE]
 
-  }#ELSE
+  ## }#ELSE
 
 }#DROP.ARC.BACKEND
 
