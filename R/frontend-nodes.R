@@ -198,3 +198,30 @@ out.degree = function(x, node) {
 }#OUT.DEGREE
 
 
+`nodes<-` <- function(object, value){
+  UseMethod("nodes<-", object)
+}
+
+`nodes<-.bn` <- function(object, value){
+  value <- as.character(value)
+  nodes <- names(object$nodes)
+  if(length(nodes) != length(value))
+    stop(sprintf("length of new node names (%s) should be equal to the number of nodes in the graph (%s)",
+                 length(value), length(nodes)))
+  .subst <- function(nms){
+    m <- match(nms, nodes)
+    value[m]
+  }
+
+  if(!is.null(object$whitelist))
+    object$whitelist <- .subst(object$whitelist)
+
+  if(!is.null(object$blacklist))
+    object$blacklist <- .subst(object$blacklist)
+
+  object$nodes <- rapply(object$nodes, .subst, how = "replace")
+  names(object$nodes) <- .subst(object$nodes)
+
+  object$arcs[] <- .subst(object$arcs)
+  object
+}
