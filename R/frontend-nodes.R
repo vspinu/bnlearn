@@ -220,7 +220,7 @@ out.degree = function(x, node) {
     object$blacklist <- .subst(object$blacklist)
 
   object$nodes <- rapply(object$nodes, .subst, how = "replace")
-  names(object$nodes) <- .subst(object$nodes)
+  names(object$nodes) <- .subst(names(object$nodes))
 
   object$arcs[] <- .subst(object$arcs)
   object
